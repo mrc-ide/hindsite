@@ -1,0 +1,22 @@
+test_that("age aggregation works", {
+  x <- data.frame(
+    year = c(2000, 2000),
+    par1 = c(0, 1),
+    par2 = c(0, 2),
+    pop = c(0, 3),
+    cases1 = c(0, 4),
+    cases2 = c(0, 5),
+    severe1 = c(0, 6),
+    severe2 = c(0, 7),
+    yll = c(0, 8),
+    yld = c(0, 9),
+    dalys = c(0, 10),
+    commodity1 = c(0, 11),
+    commodity2 = c(0, 12),
+    cost1 = c(0, 13),
+    cost2 = c(0, 14)
+  )
+  y <- aggregate_age(x)
+  expect_equal(as.numeric(y[1,]), c(2000, 1:14))
+  expect_equal(colnames(y), colnames(x))
+})

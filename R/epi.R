@@ -121,6 +121,13 @@ non_malarial_fevers <- function(x, rate_under_5 = 3.4, rate_over_5 = 1){
     dplyr::mutate(non_malarial_fevers = round(ifelse(.data$age_l == 0, rate_under_5 * .data$par, rate_over_5 * .data$par)))
 }
 
+#' Converts modelled quantities of age-disaggregated cases and severe cases
+#' to rates
+#'
+#' @param x Model output
+#' @param modelled_population_size Modelled population size
+#'
+#' @return Output with rates
 add_rates <- function(x, modelled_population_size){
   x |>
   dplyr::mutate(

@@ -2,12 +2,29 @@ test_that("nets", {
   iso3c = "BFA"
   x <- data.frame(itn_use = c(0, 0.5),
                   par = c(100, 100))
-  y <- add_nets(x, iso3c = iso3c)
+  y <- add_nets(x, iso3c = iso3c, country_ur = TRUE)
 
   urs <- netz::get_usage_rate_data()
   ur <- urs[urs$iso3 == iso3c,2]
   hls <- netz::get_halflife_data()
   hl <- hls[hls$iso3 == iso3c,2]
+  access = netz::usage_to_access(usage = x$itn_use, use_rate = ur)
+  crop = netz::access_to_crop(access, type = "loess_extrapolate")
+  commodity_nets_distributed = netz::crop_to_distribution(crop = crop, distribution_freq = 3 * 365, half_life = hl) * x$par
+
+  expect_equal(y$commodity_nets_distributed, commodity_nets_distributed)
+
+  y <- add_nets(x, iso3c = iso3c, country_ur = FALSE)
+  ur <- 0.88
+  access = netz::usage_to_access(usage = x$itn_use, use_rate = ur)
+  crop = netz::access_to_crop(access, type = "loess_extrapolate")
+  commodity_nets_distributed = netz::crop_to_distribution(crop = crop, distribution_freq = 3 * 365, half_life = hl) * x$par
+
+  expect_equal(y$commodity_nets_distributed, commodity_nets_distributed)
+
+  y <- add_nets(x, iso3c = "X", country_ur = TRUE)
+  ur <- median(urs$usage_rate)
+  hl <- median(hls$half_life)
   access = netz::usage_to_access(usage = x$itn_use, use_rate = ur)
   crop = netz::access_to_crop(access, type = "loess_extrapolate")
   commodity_nets_distributed = netz::crop_to_distribution(crop = crop, distribution_freq = 3 * 365, half_life = hl) * x$par

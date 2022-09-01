@@ -77,3 +77,21 @@ test_that("nmfs", {
   y <- non_malarial_fevers(x)
   expect_equal(y$non_malarial_fevers, c(3.4 * 1000, 1 * 1000))
 })
+
+test_that("add rates",{
+  x <- data.frame(age = c(1, 1, 2, 2),
+                  prop = c(0.25,0.75, 0.25, 0.75),
+                  clinical_pf = c(0, 1, 0, 1),
+                  severe_pf = c(0, 1, 0, 1),
+                  clinical_pv = c(0, 1, 0, 1),
+                  severe_pv = c(0, 1, 0, 1))
+  modelled_population_size <- 1000
+  y <- add_rates(x, modelled_population_size)
+  expect_equal(y,
+               data.frame(age = x$age,
+                          prop = x$prop,
+                          clinical_pf = x$clinical_pf / (modelled_population_size * x$prop),
+                          severe_pf = x$severe_pf / (modelled_population_size * x$prop),
+                          clinical_pv = x$clinical_pv / (modelled_population_size * x$prop),
+                          severe_pv = x$severe_pv / (modelled_population_size * x$prop)))
+})

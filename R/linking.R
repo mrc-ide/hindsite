@@ -40,7 +40,6 @@ link_pop <- function(x, population){
       pop = .data$pop * .data$prop,
       par = .data$par * .data$prop,
       par_pf = .data$par_pf * .data$prop,
-      par_pv = .data$par_pv * .data$prop
-    ) |>
+      par_pv = .data$par_pv * .data$prop) |>
     dplyr::select(-.data$prop)
 }

@@ -87,5 +87,11 @@ test_that("facility costs", {
 
   expect_equal(y$cost_inpatient, round(x$commodity_inpatient_visits * facility_costs$inpatient))
   expect_equal(y$cost_outpatient, round(x$commodity_outpatient_visits * facility_costs$outpatient))
+
+  y <- add_facility_costs(x, iso3c = "x")
+  facility_costs <- treasure::who_choice
+
+  expect_equal(y$cost_inpatient, round(x$commodity_inpatient_visits * median(facility_costs$inpatient)))
+  expect_equal(y$cost_outpatient, round(x$commodity_outpatient_visits * median(facility_costs$outpatient)))
 })
 

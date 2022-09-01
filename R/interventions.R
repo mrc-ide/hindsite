@@ -2,16 +2,21 @@
 #'
 #' @param x output
 #' @param iso3c Country ISO3c code
+#' @param country_ur Use country-level usage rate estimates
 #'
 #' @return output with net numbers
 #' @export
-add_nets <- function(x, iso3c){
+add_nets <- function(x, iso3c, country_ur = FALSE){
   # Usage rate
   urd <- netz::get_usage_rate_data()
-  if(iso3c %in% urd$iso3){
-    ur <- urd[urd$iso3 == iso3c, "usage_rate"]
-  } else {
-    ur = stats::median(urd$usage_rate)
+  # Fixed WHO value
+  ur <- 0.88
+  if(country_ur){
+    if(iso3c %in% urd$iso3){
+      ur <- urd[urd$iso3 == iso3c, "usage_rate"]
+    } else {
+      ur = stats::median(urd$usage_rate)
+    }
   }
   # Retention half life
   hld <- netz::get_halflife_data()
@@ -24,6 +29,7 @@ add_nets <- function(x, iso3c){
   x |>
     dplyr::mutate(
       access = netz::usage_to_access(usage = .data$itn_use, use_rate = ur),
+      access = ifelse(is.na(.data$access), 1, .data$access),
       crop = netz::access_to_crop(.data$access, type = "loess_extrapolate"),
       commodity_nets_distributed = netz::crop_to_distribution(crop = .data$crop, distribution_freq = 3 * 365, half_life = hl) * .data$par) |>
     dplyr::select(-c(.data$access, .data$crop))
@@ -36,7 +42,7 @@ add_nets <- function(x, iso3c){
 #' @return output with net costs
 #' @export
 add_net_cost <- function(x){
- x |>
+  x |>
     dplyr::mutate(cost_itn = dplyr::case_when(
       net_type == "pyrethroid_only" ~ treasure::cost_llin(.data$commodity_nets_distributed),
       net_type == "pyrethroid_pbo" ~ treasure::cost_pbo_itn(.data$commodity_nets_distributed),
