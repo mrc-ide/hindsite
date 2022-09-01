@@ -46,6 +46,9 @@
     <loc>/reference/add_pmc_cost.html</loc>
   </url>
   <url>
+    <loc>/reference/add_rates.html</loc>
+  </url>
+  <url>
     <loc>/reference/add_rtss.html</loc>
   </url>
   <url>
@@ -67,6 +70,9 @@
     <loc>/reference/add_tx_costs.html</loc>
   </url>
   <url>
+    <loc>/reference/add_year.html</loc>
+  </url>
+  <url>
     <loc>/reference/aggregate_age.html</loc>
   </url>
   <url>
@@ -77,6 +83,21 @@
   </url>
   <url>
     <loc>/reference/deaths.html</loc>
+  </url>
+  <url>
+    <loc>/reference/exp_mid.html</loc>
+  </url>
+  <url>
+    <loc>/reference/format_age.html</loc>
+  </url>
+  <url>
+    <loc>/reference/format_epi.html</loc>
+  </url>
+  <url>
+    <loc>/reference/format_interventions.html</loc>
+  </url>
+  <url>
+    <loc>/reference/format_prev.html</loc>
   </url>
   <url>
     <loc>/reference/index.html</loc>
