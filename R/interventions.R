@@ -15,16 +15,21 @@ add_nets <- function(x, iso3c, country_ur = FALSE){
     if(iso3c %in% urd$iso3){
       ur <- urd[urd$iso3 == iso3c, "usage_rate"]
     } else {
-      ur = stats::median(urd$usage_rate)
+      ur <- stats::median(urd$usage_rate)
     }
   }
+  ur_min <- min(urd$usage_rate)
+  ur_max <- max(urd$usage_rate)
+
   # Retention half life
   hld <- netz::get_halflife_data()
   if(iso3c %in% hld$iso3){
     hl <- hld[hld$iso3 == iso3c, "half_life"]
   } else {
-    hl = stats::median(hld$half_life)
+    hl <- stats::median(hld$half_life)
   }
+  hl_min <- min(hld$half_life)
+  hl_max <- max(hld$half_life)
 
   x |>
     dplyr::mutate(
