@@ -2,24 +2,19 @@
 #'
 #' @param x output
 #' @param iso3c Country ISO3c code
-#' @param country_ur Use country-level usage rate estimates
 #'
 #' @return output with net numbers
 #' @export
-add_nets <- function(x, iso3c, country_ur = FALSE){
+add_nets <- function(x, iso3c){
   # Usage rate
   urd <- netz::get_usage_rate_data()
-  # Fixed WHO value
-  ur <- 0.88
-  if(country_ur){
-    if(iso3c %in% urd$iso3){
-      ur <- urd[urd$iso3 == iso3c, "usage_rate"]
-    } else {
-      ur <- stats::median(urd$usage_rate)
-    }
+  if(iso3c %in% urd$iso3){
+    ur <- urd[urd$iso3 == iso3c, "usage_rate"]
+  } else {
+    ur <- stats::median(urd$usage_rate)
   }
-  ur_min <- min(urd$usage_rate)
-  ur_max <- max(urd$usage_rate)
+  ur_min <- stats::quantile(urd$usage_rate, 0.025)
+  ur_max <- stats::quantile(urd$usage_rate, 0.975)
 
   # Retention half life
   hld <- netz::get_halflife_data()
@@ -28,16 +23,24 @@ add_nets <- function(x, iso3c, country_ur = FALSE){
   } else {
     hl <- stats::median(hld$half_life)
   }
-  hl_min <- min(hld$half_life)
-  hl_max <- max(hld$half_life)
+  hl_min <- stats::quantile(hld$half_life, 0.025)
+  hl_max <- stats::quantile(hld$half_life, 0.975)
 
   x |>
     dplyr::mutate(
       access = netz::usage_to_access(usage = .data$itn_use, use_rate = ur),
       access = ifelse(is.na(.data$access), 1, .data$access),
+      access_lower = netz::usage_to_access(usage = .data$itn_use, use_rate = ur_max),
+      access_lower = ifelse(is.na(.data$access_lower), 1, .data$access_lower),
+      access_upper = netz::usage_to_access(usage = .data$itn_use, use_rate = ur_min),
+      access_upper = ifelse(is.na(.data$access_upper), 1, .data$access_upper),
       crop = netz::access_to_crop(.data$access, type = "loess_extrapolate"),
-      commodity_nets_distributed = netz::crop_to_distribution(crop = .data$crop, distribution_freq = 3 * 365, half_life = hl) * .data$par) |>
-    dplyr::select(-c(.data$access, .data$crop))
+      crop_lower = netz::access_to_crop(.data$access_lower, type = "loess_extrapolate"),
+      crop_upper = netz::access_to_crop(.data$access_upper, type = "loess_extrapolate"),
+      commodity_nets_distributed = round(netz::crop_to_distribution(crop = .data$crop, distribution_freq = 3 * 365, half_life = hl) * .data$par),
+      commodity_nets_distributed_lower = round(netz::crop_to_distribution(crop = .data$crop_lower, distribution_freq = 3 * 365, half_life = hl_max) * .data$par),
+      commodity_nets_distributed_upper = round(netz::crop_to_distribution(crop = .data$crop_upper, distribution_freq = 3 * 365, half_life = hl_min) * .data$par)) |>
+    dplyr::select(-c(.data$access_lower, .data$access_upper, .data$crop, .data$crop_lower, .data$crop_upper))
 }
 
 #' Add net costs
@@ -49,10 +52,10 @@ add_nets <- function(x, iso3c, country_ur = FALSE){
 add_net_cost <- function(x){
   x |>
     dplyr::mutate(cost_itn = dplyr::case_when(
-      net_type == "pyrethroid_only" ~ treasure::cost_llin(.data$commodity_nets_distributed),
-      net_type == "pyrethroid_pbo" ~ treasure::cost_pbo_itn(.data$commodity_nets_distributed),
+      net_type == "pyrethroid_only" ~ round(treasure::cost_llin(.data$commodity_nets_distributed)),
+      net_type == "pyrethroid_pbo" ~ round(treasure::cost_pbo_itn(.data$commodity_nets_distributed)),
       # Assume these nets are 10% more costly than pyrethroid PBO
-      net_type == "pyrethroid_pyrrole" ~ treasure::cost_pbo_itn(.data$commodity_nets_distributed, pbo_itn_unit_cost = 3.51 * 1.1)
+      net_type == "pyrethroid_pyrrole" ~ round(treasure::cost_pbo_itn(.data$commodity_nets_distributed, pbo_itn_unit_cost = 3.51 * 1.1))
     ))
 }
 
@@ -64,8 +67,12 @@ add_net_cost <- function(x){
 #' @export
 add_irs <- function(x){
   x |>
-    dplyr::mutate(commodity_irs_people_protected = round(.data$irs_cov *  .data$par),
-                  commodity_irs_households_sprayed = round(.data$commodity_irs_people_protected / .data$hh_size))
+    dplyr::mutate(commodity_irs_people_protected = round(.data$irs_cov * .data$par),
+                  commodity_irs_people_protected_lower = round(beta_coverage_ci(.data$irs_cov, 0.025, 9720) * .data$par),
+                  commodity_irs_people_protected_upper = round(beta_coverage_ci(.data$irs_cov, 0.975, 9720) * .data$par),
+                  commodity_irs_households_sprayed = round(.data$commodity_irs_people_protected / .data$hh_size),
+                  commodity_irs_households_sprayed_lower = round(.data$commodity_irs_people_protected_lower / .data$hh_size),
+                  commodity_irs_households_sprayed_upper = round(.data$commodity_irs_people_protected_upper / .data$hh_size))
 }
 
 #' IRS costs
@@ -76,7 +83,7 @@ add_irs <- function(x){
 #' @export
 add_irs_cost <- function(x){
   x |>
-    dplyr::mutate(cost_irs = treasure::cost_ll_irs_person(.data$commodity_irs_people_protected))
+    dplyr::mutate(cost_irs = round(treasure::cost_ll_irs_person(.data$commodity_irs_people_protected)))
 }
 
 #' Add PMC
@@ -100,7 +107,7 @@ add_pmc <- function(x, modelled_population_size, doses_per_child = 3){
 #' @export
 add_pmc_cost <- function(x){
   x |>
-    dplyr::mutate(cost_pmc = treasure::cost_ipti(n_doses = .data$commodity_pmc_doses))
+    dplyr::mutate(cost_pmc = round(treasure::cost_ipti(n_doses = .data$commodity_pmc_doses)))
 }
 
 #' Add SMC
@@ -111,8 +118,16 @@ add_pmc_cost <- function(x){
 #' @return output with pmc doses and children protected
 add_smc <- function(x, modelled_population_size){
   x |>
-    dplyr::mutate(commodity_smc_doses = round((.data$n_smc_treated / modelled_population_size) * .data$par_pf),
-                  commodity_smc_children_protected = round(.data$commodity_smc_doses / .data$smc_n_rounds))
+    dplyr::mutate(
+      smc_dose_cov = .data$n_smc_treated / modelled_population_size,
+      commodity_smc_doses = round(.data$smc_dose_cov * .data$par_pf),
+      commodity_smc_doses_lower = round(beta_coverage_ci(.data$smc_dose_cov, 0.025, 1473) * .data$par_pf),
+      commodity_smc_doses_upper = round(beta_coverage_ci(.data$smc_dose_cov, 0.975, 1473) * .data$par_pf),
+      commodity_smc_children_protected = round(.data$commodity_smc_doses / .data$smc_n_rounds),
+      commodity_smc_children_protected_lower = round(.data$commodity_smc_doses_lower / .data$smc_n_rounds),
+      commodity_smc_children_protected_upper = round(.data$commodity_smc_doses_upper / .data$smc_n_rounds)
+    ) |>
+    dplyr::select(-.data$smc_dose_cov)
 }
 
 #' Add SMC cost
@@ -123,7 +138,7 @@ add_smc <- function(x, modelled_population_size){
 #' @export
 add_smc_cost <- function(x){
   x |>
-    dplyr::mutate(cost_smc = treasure::cost_smc(n_doses = .data$commodity_smc_doses))
+    dplyr::mutate(cost_smc = round(treasure::cost_smc(n_doses = .data$commodity_smc_doses)))
 }
 
 #' Add RTS,S
@@ -147,6 +162,6 @@ add_rtss <- function(x, modelled_population_size, rtss_doses_per_child = 4){
 #' @export
 add_rtss_cost <- function(x){
   x |>
-    dplyr::mutate(cost_rtss = treasure::cost_rtss(n_doses = .data$commodity_rtss_doses))
+    dplyr::mutate(cost_rtss = round(treasure::cost_rtss(n_doses = .data$commodity_rtss_doses)))
 }
 

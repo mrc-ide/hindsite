@@ -1,7 +1,11 @@
 test_that("dx tx commodities", {
   x <- data.frame(
     cases_pf = c(0, 100),
+    cases_pf_lower = c(0, 10),
+    cases_pf_upper = c(10 , 200),
     cases_pv = c(0, 100),
+    cases_pv_lower = c(0, 10),
+    cases_pv_upper = c(10 , 200),
     pfpr_2_10 = c(0.06, 0.06),
     tx_cov = c(0.5, 0.5),
     prop_public = c(0.2, 0.2),
@@ -26,6 +30,8 @@ test_that("dx tx commodities", {
   expect_equal(y$commodity_nmf_rdt_private, (1 - x$prop_public) * x$tx_cov * x$non_malarial_fevers * x$prop_act)
   expect_equal(y$commodity_nmf_act_public, round(y$commodity_nmf_rdt_public * x$pfpr_2_10))
   expect_equal(y$commodity_nmf_act_private, round(y$commodity_nmf_rdt_private * x$pfpr_2_10))
+
+  test_bounds(y)
 })
 
 test_that("dx tx costs", {
@@ -49,31 +55,41 @@ test_that("dx tx costs", {
 
   y <- add_tx_costs(x)
 
-  expect_equal(y$cost_act_public, treasure::cost_al(
-    n_doses = (x$commodity_act_public + x$commodity_nmf_act_public) * 3 * 2 * 1))
-  expect_equal(y$cost_act_private, treasure::cost_al(
-    n_doses = (x$commodity_act_private + x$commodity_nmf_act_private) * 3 * 2 * 1))
-  expect_equal(y$cost_microscopy_public, treasure::cost_rdt(n_tests = x$commodity_microscopy_public))
-  expect_equal(y$cost_microscopy_private, treasure::cost_rdt(n_tests = x$commodity_microscopy_private))
-  expect_equal(y$cost_non_act_public, treasure::cost_al(x$commodity_non_act_public * 3 * 2 * 1))
-  expect_equal(y$cost_non_act_private, treasure::cost_al(x$commodity_non_act_private * 3 * 2 * 1))
-  expect_equal(y$cost_primaquine_public, treasure::cost_primaquine(x$commodity_primaquine_public * 14 * 0.25 * 7.5 / 7.5))
-  expect_equal(y$cost_primaquine_private, treasure::cost_primaquine(x$commodity_primaquine_private * 14 * 0.25 * 7.5 / 7.5))
+  expect_equal(y$cost_act_public, round(treasure::cost_al(
+    n_doses = (x$commodity_act_public + x$commodity_nmf_act_public) * 3 * 2 * 1)))
+  expect_equal(y$cost_act_private, round(treasure::cost_al(
+    n_doses = (x$commodity_act_private + x$commodity_nmf_act_private) * 3 * 2 * 1)))
+  expect_equal(y$cost_microscopy_public, round(treasure::cost_rdt(n_tests = x$commodity_microscopy_public)))
+  expect_equal(y$cost_microscopy_private, round(treasure::cost_rdt(n_tests = x$commodity_microscopy_private)))
+  expect_equal(y$cost_non_act_public, round(treasure::cost_al(x$commodity_non_act_public * 3 * 2 * 1)))
+  expect_equal(y$cost_non_act_private, round(treasure::cost_al(x$commodity_non_act_private * 3 * 2 * 1)))
+  expect_equal(y$cost_primaquine_public, round(treasure::cost_primaquine(x$commodity_primaquine_public * 14 * 0.25 * 7.5 / 7.5)))
+  expect_equal(y$cost_primaquine_private, round(treasure::cost_primaquine(x$commodity_primaquine_private * 14 * 0.25 * 7.5 / 7.5)))
 })
 
 test_that("facility visits", {
   x <- data.frame(
     tx_cov = c(0.5, 0.5),
     cases_pf = c(0, 100),
+    cases_pf_lower = c(0, 10),
+    cases_pf_upper = c(10, 200),
     cases_pv = c(0, 100),
+    cases_pv_lower = c(0, 10),
+    cases_pv_upper = c(10, 200),
     severe_cases_pf = c(0, 100),
+    severe_cases_pf_lower = c(0, 10),
+    severe_cases_pf_upper = c(20, 200),
     severe_cases_pv = c(0, 100),
+    severe_cases_pv_lower = c(0, 10),
+    severe_cases_pv_upper = c(20, 200),
     prop_public = c(0.2, 0.2)
   )
   y <- add_facility_visits(x)
 
   expect_equal(y$commodity_inpatient_visits, x$tx_cov * (x$severe_cases_pf + x$severe_cases_pv))
   expect_equal(y$commodity_outpatient_visits, x$tx_cov * (x$severe_cases_pf + x$severe_cases_pv) * x$prop_public)
+
+  test_bounds(y)
 })
 
 test_that("facility costs", {

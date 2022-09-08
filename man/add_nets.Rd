@@ -4,14 +4,12 @@
 \alias{add_nets}
 \title{Add nets}
 \usage{
-add_nets(x, iso3c, country_ur = FALSE)
+add_nets(x, iso3c)
 }
 \arguments{
 \item{x}{output}
 
 \item{iso3c}{Country ISO3c code}
-
-\item{country_ur}{Use country-level usage rate estimates}
 }
 \value{
 output with net numbers

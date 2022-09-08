@@ -24,7 +24,11 @@ mortality_rate <- function(x,
 #' @export
 cases <- function(x){
   x$cases_pf <- round(x$par_pf * x$clinical_pf)
+  x$cases_pf_lower <- epi_uncertainty_approximation(x$cases_pf, 0.025, 0.227)
+  x$cases_pf_upper <- epi_uncertainty_approximation(x$cases_pf, 0.975, 0.227)
   x$cases_pv <- round(x$par_pv * x$clinical_pv)
+  x$cases_pv_lower <- epi_uncertainty_approximation(x$cases_pv, 0.025, 0.227)
+  x$cases_pv_upper <- epi_uncertainty_approximation(x$cases_pv, 0.975, 0.227)
   return(x)
 }
 
@@ -35,7 +39,11 @@ cases <- function(x){
 #' @return output with severe cases
 severe_cases <- function(x){
   x$severe_cases_pf <- round(x$par_pf * x$severe_pf)
+  x$severe_cases_pf_lower <- epi_uncertainty_approximation(x$severe_cases_pf, 0.025, 0.265)
+  x$severe_cases_pf_upper <- epi_uncertainty_approximation(x$severe_cases_pf, 0.975, 0.265)
   x$severe_cases_pv <- round(x$par_pv * x$severe_pv)
+  x$severe_cases_pv_lower <- epi_uncertainty_approximation(x$severe_cases_pv, 0.025, 0.265)
+  x$severe_cases_pv_upper <- epi_uncertainty_approximation(x$severe_cases_pv, 0.975, 0.265)
   return(x)
 }
 
@@ -47,7 +55,11 @@ severe_cases <- function(x){
 #' @export
 deaths <- function(x){
   x$deaths_pf <- round(x$par_pf * x$mortality_pf)
+  x$deaths_pf_lower <- epi_uncertainty_approximation(x$deaths_pf, 0.025, 0.265)
+  x$deaths_pf_upper <- epi_uncertainty_approximation(x$deaths_pf, 0.975, 0.265)
   x$deaths_pv <- round(x$par_pv * x$mortality_pv)
+  x$deaths_pv_lower <- epi_uncertainty_approximation(x$deaths_pv, 0.025, 0.265)
+  x$deaths_pv_upper <- epi_uncertainty_approximation(x$deaths_pv, 0.975, 0.265)
   return(x)
 }
 
@@ -61,7 +73,9 @@ deaths <- function(x){
 #' @return output with yll
 #' @export
 yll <- function(x, life_expectancy){
-  x$yll <- (life_expectancy - x$age_mid / 365) * (x$deaths_pf + x$deaths_pv)
+  x$yll <- round((life_expectancy - x$age_mid / 365) * (x$deaths_pf + x$deaths_pv))
+  x$yll_lower <- round((life_expectancy - x$age_mid / 365) * (x$deaths_pf_lower + x$deaths_pv_lower))
+  x$yll_upper <- round((life_expectancy - x$age_mid / 365) * (x$deaths_pf_upper + x$deaths_pv_upper))
   return(x)
 }
 
@@ -90,8 +104,13 @@ yld <- function(x, episode_length = 0.01375, severe_episode_length = 0.04795,
         .data$age_l  == 1825 ~ weight2,
         .data$age_l == 5475 ~ weight3
       ),
-      yld = (.data$cases_pf + .data$cases_pv)  * episode_length * .data$weight +
-        (.data$severe_cases_pf + .data$severe_cases_pv) * severe_episode_length * severe_weight)
+      yld = round((.data$cases_pf + .data$cases_pv)  * episode_length * .data$weight +
+        (.data$severe_cases_pf + .data$severe_cases_pv) * severe_episode_length * severe_weight),
+      yld_lower = round((.data$cases_pf_lower + .data$cases_pv_lower)  * episode_length * .data$weight +
+        (.data$severe_cases_pf_lower + .data$severe_cases_pv_lower) * severe_episode_length * severe_weight),
+      yld_upper = round((.data$cases_pf_upper + .data$cases_pv_upper)  * episode_length * .data$weight +
+        (.data$severe_cases_pf_upper + .data$severe_cases_pv_upper) * severe_episode_length * severe_weight)) |>
+    dplyr::select(-.data$weight)
 }
 
 #' DALYs
@@ -102,6 +121,8 @@ yld <- function(x, episode_length = 0.01375, severe_episode_length = 0.04795,
 #' @export
 dalys <- function(x){
   x$dalys <- round(x$yll + x$yld)
+  x$dalys_lower <- round(x$yll_lower + x$yld_lower)
+  x$dalys_upper <- round(x$yll_upper + x$yld_upper)
   return(x)
 }
 

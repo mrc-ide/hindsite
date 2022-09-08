@@ -37,9 +37,9 @@ link_pop <- function(x, population){
   x |>
     dplyr::left_join(population, by = "year") |>
     dplyr::mutate(
-      pop = .data$pop * .data$prop,
-      par = .data$par * .data$prop,
-      par_pf = .data$par_pf * .data$prop,
-      par_pv = .data$par_pv * .data$prop) |>
+      pop = round(.data$pop * .data$prop),
+      par = round(.data$par * .data$prop),
+      par_pf = round(.data$par_pf * .data$prop),
+      par_pv = round(.data$par_pv * .data$prop)) |>
     dplyr::select(-.data$prop)
 }
