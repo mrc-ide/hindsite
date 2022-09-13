@@ -9,7 +9,7 @@ run_site <- function(site, population_size = 1000){
     species <- sp[i]
     eir <- unlist(site$eir[site$eir$spp == species, "eir"])
 
-    if(length(eir) == 1){
+    if(eir > 0){
       p <- site::site_parameters(interventions = site$interventions,
                                  demography = site$demography,
                                  vectors = site$vectors,
