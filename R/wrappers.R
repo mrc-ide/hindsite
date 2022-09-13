@@ -23,7 +23,7 @@ run_site <- function(site, population_size = 1000){
       sim_out <- malariasimulation::run_simulation(p$timesteps, p)
     } else {
       # If species not present return blank output template
-      sim_out <- data.frame(timesteps = 1:(diff(range(site$interventions$year)) + 1) * 365)
+      sim_out <- data.frame(timestep = 1:(diff(range(site$interventions$year)) + 1) * 365)
     }
 
     sim_out <- sim_out |>
