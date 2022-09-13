@@ -47,14 +47,16 @@ format_prev <- function(x, species){
       dplyr::mutate(pfpr_2_10 = .data$n_detect_730_3649 / .data$n_730_3649) |>
       dplyr::group_by(.data$year) |>
       dplyr::summarise(pfpr_2_10 = mean(.data$pfpr_2_10)) |>
-      dplyr::ungroup()
+      dplyr::ungroup() |>
+      tidyr::replace_na(list(pfpr_2_10 = 0))
   }
   if(species == "pv"){
     prev <- x |>
       dplyr::mutate(pvpr_1_99 = .data$n_detect_365_36499 / .data$n_365_36499) |>
       dplyr::group_by(.data$year) |>
       dplyr::summarise(pvpr_1_99 = mean(.data$pvpr_1_99)) |>
-      dplyr::ungroup()
+      dplyr::ungroup() |>
+      tidyr::replace_na(list(pvpr_1_99 = 0))
   }
   return(prev)
 }
