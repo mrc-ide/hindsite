@@ -1,19 +1,18 @@
 #' Add mortality rate
 #'
 #' @param x output
-#' @param scaler_pf Scaler for falciparum severe cases to deaths
-#' @param scaler_pv Scaler for vivax severe cases to deaths. The reference for
-#' this is Ahmed Rahimi, et al. (2014).
-#' @param treatment_scaler Impact of treatment coverage on scaling
+#' @param scaler Scaler for severe cases to deaths. Have used
+#' original fitted scaler  of 0.215 for falciparum. For vivax can use a scaler
+#' of 0.003 (Ahmed Rahimi, et al. (2014)).
+#' @param treatment_scaler Impact of treatment coverage on scaling.
 #'
 #' @return output with mortality rates
 #' @export
 mortality_rate <- function(x,
-                           scaler_pf = 0.215, scaler_pv  = 0.003,
+                           scaler,
                            treatment_scaler = 0.5){
   x |>
-    dplyr::mutate(mortality_pf = (1 - (treatment_scaler * .data$tx_cov)) * scaler_pf * .data$severe_pf,
-                  mortality_pv = (1 - (treatment_scaler * .data$tx_cov)) * scaler_pv * .data$severe_pv)
+    dplyr::mutate(mort = (1 - (treatment_scaler * .data$tx_cov)) * scaler * .data$sev)
 }
 
 #' Add malaria cases
@@ -23,13 +22,13 @@ mortality_rate <- function(x,
 #' @return output with cases
 #' @export
 cases <- function(x){
-  x$cases_pf <- round(x$par_pf * x$clinical_pf)
-  x$cases_pf_lower <- epi_uncertainty_approximation(x$cases_pf, 0.025, 0.227)
-  x$cases_pf_upper <- epi_uncertainty_approximation(x$cases_pf, 0.975, 0.227)
-  x$cases_pv <- round(x$par_pv * x$clinical_pv)
-  x$cases_pv_lower <- epi_uncertainty_approximation(x$cases_pv, 0.025, 0.227)
-  x$cases_pv_upper <- epi_uncertainty_approximation(x$cases_pv, 0.975, 0.227)
-  return(x)
+  x |>
+    mutate(
+      cases = round(par * inc),
+      cases_lower = epi_uncertainty_approximation(cases, 0.025, 0.227),
+      cases_upper = epi_uncertainty_approximation(cases, 0.975, 0.227)
+    ) |>
+    dplyr::select(-.data$inc)
 }
 
 #' Add malaria severe cases
@@ -38,13 +37,13 @@ cases <- function(x){
 #'
 #' @return output with severe cases
 severe_cases <- function(x){
-  x$severe_cases_pf <- round(x$par_pf * x$severe_pf)
-  x$severe_cases_pf_lower <- epi_uncertainty_approximation(x$severe_cases_pf, 0.025, 0.265)
-  x$severe_cases_pf_upper <- epi_uncertainty_approximation(x$severe_cases_pf, 0.975, 0.265)
-  x$severe_cases_pv <- round(x$par_pv * x$severe_pv)
-  x$severe_cases_pv_lower <- epi_uncertainty_approximation(x$severe_cases_pv, 0.025, 0.265)
-  x$severe_cases_pv_upper <- epi_uncertainty_approximation(x$severe_cases_pv, 0.975, 0.265)
-  return(x)
+  x |>
+    mutate(
+      severe_cases = round(par * sev),
+      severe_cases_lower = epi_uncertainty_approximation(severe_cases, 0.025, 0.265),
+      severe_cases_upper = epi_uncertainty_approximation(severe_cases, 0.975, 0.265)
+    ) |>
+    dplyr::select(-.data$sev)
 }
 
 #' Add malaria deaths
@@ -54,13 +53,13 @@ severe_cases <- function(x){
 #' @return output with deaths
 #' @export
 deaths <- function(x){
-  x$deaths_pf <- round(x$par_pf * x$mortality_pf)
-  x$deaths_pf_lower <- epi_uncertainty_approximation(x$deaths_pf, 0.025, 0.265)
-  x$deaths_pf_upper <- epi_uncertainty_approximation(x$deaths_pf, 0.975, 0.265)
-  x$deaths_pv <- round(x$par_pv * x$mortality_pv)
-  x$deaths_pv_lower <- epi_uncertainty_approximation(x$deaths_pv, 0.025, 0.265)
-  x$deaths_pv_upper <- epi_uncertainty_approximation(x$deaths_pv, 0.975, 0.265)
-  return(x)
+  x |>
+    mutate(
+      deaths = round(par * mort),
+      deaths_lower = epi_uncertainty_approximation(deaths, 0.025, 0.265),
+      deaths_upper = epi_uncertainty_approximation(deaths, 0.975, 0.265)
+    ) |>
+    dplyr::select(-.data$mort)
 }
 
 #' Years of life lost
@@ -73,10 +72,12 @@ deaths <- function(x){
 #' @return output with yll
 #' @export
 yll <- function(x, life_expectancy){
-  x$yll <- round((life_expectancy - x$age_mid / 365) * (x$deaths_pf + x$deaths_pv))
-  x$yll_lower <- round((life_expectancy - x$age_mid / 365) * (x$deaths_pf_lower + x$deaths_pv_lower))
-  x$yll_upper <- round((life_expectancy - x$age_mid / 365) * (x$deaths_pf_upper + x$deaths_pv_upper))
-  return(x)
+  x |>
+    mutate(
+      yll = round((life_expectancy - age_mid / 365) * deaths),
+      yll_lower = round((life_expectancy - age_mid / 365) * deaths),
+      yll_upper = round((life_expectancy - age_mid / 365) * deaths)
+    )
 }
 
 #' Years of life with disability
@@ -104,12 +105,12 @@ yld <- function(x, episode_length = 0.01375, severe_episode_length = 0.04795,
         .data$age_l  == 1825 ~ weight2,
         .data$age_l == 5475 ~ weight3
       ),
-      yld = round((.data$cases_pf + .data$cases_pv)  * episode_length * .data$weight +
-        (.data$severe_cases_pf + .data$severe_cases_pv) * severe_episode_length * severe_weight),
-      yld_lower = round((.data$cases_pf_lower + .data$cases_pv_lower)  * episode_length * .data$weight +
-        (.data$severe_cases_pf_lower + .data$severe_cases_pv_lower) * severe_episode_length * severe_weight),
-      yld_upper = round((.data$cases_pf_upper + .data$cases_pv_upper)  * episode_length * .data$weight +
-        (.data$severe_cases_pf_upper + .data$severe_cases_pv_upper) * severe_episode_length * severe_weight)) |>
+      yld = round(.data$cases  * episode_length * .data$weight +
+                    .data$severe_cases * severe_episode_length * severe_weight),
+      yld_lower = round(.data$cases_lower  * episode_length * .data$weight +
+                          .data$severe_cases_lower * severe_episode_length * severe_weight),
+      yld_upper = round(.data$cases_upper  * episode_length * .data$weight +
+                          .data$severe_cases_upper * severe_episode_length * severe_weight)) |>
     dplyr::select(-.data$weight)
 }
 
@@ -120,10 +121,12 @@ yld <- function(x, episode_length = 0.01375, severe_episode_length = 0.04795,
 #' @return output with dalys
 #' @export
 dalys <- function(x){
-  x$dalys <- round(x$yll + x$yld)
-  x$dalys_lower <- round(x$yll_lower + x$yld_lower)
-  x$dalys_upper <- round(x$yll_upper + x$yld_upper)
-  return(x)
+  x  |>
+    mutate(
+      dalys = round(yll + yld),
+      dalys_lower = round(yll_lower + yld_lower),
+      dalys_upper = round(yll_upper + yld_upper)
+    )
 }
 
 #' non_malarial_fevers
@@ -142,18 +145,15 @@ non_malarial_fevers <- function(x, rate_under_5 = 3.4, rate_over_5 = 1){
     dplyr::mutate(non_malarial_fevers = round(ifelse(.data$age_l == 0, rate_under_5 * .data$par, rate_over_5 * .data$par)))
 }
 
-#' Converts modelled quantities of age-disaggregated cases and severe cases
-#' to rates
-#'
-#' @param x Model output
-#' @param modelled_population_size Modelled population size
-#'
-#' @return Output with rates
-add_rates <- function(x, modelled_population_size){
+rates <- function(x, modelled_population){
   x |>
-  dplyr::mutate(
-    clinical_pf = .data$clinical_pf / (modelled_population_size * .data$prop),
-    severe_pf = .data$severe_pf / (modelled_population_size * .data$prop),
-    clinical_pv = .data$clinical_pv / (modelled_population_size * .data$prop),
-    severe_pv = .data$severe_pv / (modelled_population_size * .data$prop))
+    dplyr::mutate(prop = .data$n / modelled_population,
+                  inc = .data$inc / .data$n,
+                  sev = .data$sev / .data$n) |>
+    dplyr::select(-.data$n)
+}
+
+age_mid_point <- function(x){
+  x |>
+    mutate(age_mid = exp_mid(.data$age_l, .data$age_u))
 }

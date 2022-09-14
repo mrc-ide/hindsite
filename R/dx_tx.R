@@ -1,78 +1,44 @@
-#' Treatment and diagnostic commodities
-#'
-#' @param x output
-#'
-#' @return output with treatment and diagnostic commodities
-#' @export
+
 add_tx <- function(x){
   x |>
-    dplyr::mutate(commodity_act_public = round(.data$cases_pf * .data$tx_cov * .data$prop_public * .data$prop_act),
-                  commodity_act_private = round(.data$cases_pf *  .data$tx_cov * (1 - .data$prop_public) * .data$prop_act),
-                  commodity_non_act_public = round(.data$cases_pf * .data$tx_cov * .data$prop_public * (1 - .data$prop_act)),
-                  commodity_non_act_private = round(.data$cases_pf * .data$tx_cov * (1 - .data$prop_public) * (1 - .data$prop_act)),
-                  commodity_primaquine_public = round(.data$cases_pv * .data$tx_cov * .data$prop_public),
-                  commodity_primaquine_private = round(.data$cases_pv * .data$tx_cov * (1 - .data$prop_public)),
-                  commodity_rdt_public = round(.data$tx_cov * .data$prop_act * .data$cases_pf * .data$prop_public),
-                  commodity_rdt_private = round(.data$tx_cov * .data$prop_act * .data$cases_pf * (1 - .data$prop_public)),
-                  commodity_microscopy_public = round(.data$tx_cov * (1 - .data$prop_act) * .data$cases_pf * .data$prop_public) +
-                    round(.data$tx_cov * .data$cases_pv * .data$prop_public),
-                  commodity_microscopy_private = round(.data$tx_cov * (1 - .data$prop_act) * .data$cases_pf * (1 - .data$prop_public)) +
-                    round(.data$tx_cov * .data$cases_pv * (1 - .data$prop_public)),
-                  commodity_nmf_rdt_public = ifelse(.data$pfpr_2_10 > 0.05,
-                                                    round(.data$non_malarial_fevers * .data$tx_cov * .data$prop_public * .data$prop_act),
-                                                    0),
-                  commodity_nmf_rdt_private = ifelse(.data$pfpr_2_10 > 0.05,
-                                                     round(.data$non_malarial_fevers * .data$tx_cov * (1 - .data$prop_public) * .data$prop_act),
-                                                     0),
-                  commodity_nmf_act_public = round(.data$commodity_nmf_rdt_public * .data$pfpr_2_10),
-                  commodity_nmf_act_private = round(.data$commodity_nmf_rdt_private * .data$pfpr_2_10)) |>
+    add_tx_internal() |>
+    add_tx_internal(suffix = "_lower") |>
+    add_tx_internal(suffix = "_upper")
+}
 
-    dplyr::mutate(
-      tx_cov_lower = beta_coverage_ci(.data$tx_cov, q = 0.025, average_sample = 1473),
-      commodity_act_public_lower = round(.data$cases_pf_lower * .data$tx_cov_lower * .data$prop_public * .data$prop_act),
-      commodity_act_private_lower = round(.data$cases_pf_lower *  .data$tx_cov_lower * (1 - .data$prop_public) * .data$prop_act),
-      commodity_non_act_public_lower = round(.data$cases_pf_lower * .data$tx_cov_lower * .data$prop_public * (1 - .data$prop_act)),
-      commodity_non_act_private_lower = round(.data$cases_pf_lower * .data$tx_cov_lower * (1 - .data$prop_public) * (1 - .data$prop_act)),
-      commodity_primaquine_public_lower = round(.data$cases_pv_lower * .data$tx_cov_lower * .data$prop_public),
-      commodity_primaquine_private_lower = round(.data$cases_pv_lower * .data$tx_cov_lower * (1 - .data$prop_public)),
-      commodity_rdt_public_lower = round(.data$tx_cov_lower * .data$prop_act * .data$cases_pf_lower * .data$prop_public),
-      commodity_rdt_private_lower = round(.data$tx_cov_lower * .data$prop_act * .data$cases_pf_lower * (1 - .data$prop_public)),
-      commodity_microscopy_public_lower = round(.data$tx_cov_lower * (1 - .data$prop_act) * .data$cases_pf_lower * .data$prop_public) +
-        round(.data$tx_cov_lower * .data$cases_pv_lower * .data$prop_public),
-      commodity_microscopy_private_lower = round(.data$tx_cov_lower * (1 - .data$prop_act) * .data$cases_pf_lower * (1 - .data$prop_public)) +
-        round(.data$tx_cov_lower * .data$cases_pv_lower * (1 - .data$prop_public)),
-      commodity_nmf_rdt_public_lower = ifelse(.data$pfpr_2_10 > 0.05,
-                                              round(.data$non_malarial_fevers * .data$tx_cov_lower * .data$prop_public * .data$prop_act),
-                                              0),
-      commodity_nmf_rdt_private_lower = ifelse(.data$pfpr_2_10 > 0.05,
-                                               round(.data$non_malarial_fevers * .data$tx_cov_lower * (1 - .data$prop_public) * .data$prop_act),
-                                               0),
-      commodity_nmf_act_public_lower = round(.data$commodity_nmf_rdt_public_lower * .data$pfpr_2_10),
-      commodity_nmf_act_private_lower = round(.data$commodity_nmf_rdt_private_lower * .data$pfpr_2_10)) |>
+add_tx_internal <- function(x, suffix = NULL){
+  pf_cases_col <- paste0("cases", suffix, "_pf")
+  pv_cases_col <- paste0("cases", suffix, "_pv")
+  tx_cov_col <- paste0("tx_cov", suffix)
 
-    dplyr::mutate(
-      tx_cov_upper = beta_coverage_ci(.data$tx_cov, q = 0.975, average_sample = 1473),
-      commodity_act_public_upper = round(.data$cases_pf_upper * .data$tx_cov_upper * .data$prop_public * .data$prop_act),
-      commodity_act_private_upper = round(.data$cases_pf_upper *  .data$tx_cov_upper * (1 - .data$prop_public) * .data$prop_act),
-      commodity_non_act_public_upper = round(.data$cases_pf_upper * .data$tx_cov_upper * .data$prop_public * (1 - .data$prop_act)),
-      commodity_non_act_private_upper = round(.data$cases_pf_upper * .data$tx_cov_upper * (1 - .data$prop_public) * (1 - .data$prop_act)),
-      commodity_primaquine_public_upper = round(.data$cases_pv_upper * .data$tx_cov_upper * .data$prop_public),
-      commodity_primaquine_private_upper = round(.data$cases_pv_upper * .data$tx_cov_upper * (1 - .data$prop_public)),
-      commodity_rdt_public_upper = round(.data$tx_cov_upper * .data$prop_act * .data$cases_pf_upper * .data$prop_public),
-      commodity_rdt_private_upper = round(.data$tx_cov_upper * .data$prop_act * .data$cases_pf_upper * (1 - .data$prop_public)),
-      commodity_microscopy_public_upper = round(.data$tx_cov_upper * (1 - .data$prop_act) * .data$cases_pf_upper * .data$prop_public) +
-        round(.data$tx_cov_upper * .data$cases_pv_upper * .data$prop_public),
-      commodity_microscopy_private_upper = round(.data$tx_cov_upper * (1 - .data$prop_act) * .data$cases_pf_upper * (1 - .data$prop_public)) +
-        round(.data$tx_cov_upper * .data$cases_pv_upper * (1 - .data$prop_public)),
-      commodity_nmf_rdt_public_upper = ifelse(.data$pfpr_2_10 > 0.05,
-                                              round(.data$non_malarial_fevers * .data$tx_cov_upper * .data$prop_public * .data$prop_act),
-                                              0),
-      commodity_nmf_rdt_private_upper = ifelse(.data$pfpr_2_10 > 0.05,
-                                               round(.data$non_malarial_fevers * .data$tx_cov_upper * (1 - .data$prop_public) * .data$prop_act),
-                                               0),
-      commodity_nmf_act_public_upper = round(.data$commodity_nmf_rdt_public_upper * .data$pfpr_2_10),
-      commodity_nmf_act_private_upper = round(.data$commodity_nmf_rdt_private_upper * .data$pfpr_2_10))
+  tx_df <-
+    data.frame(commodity_act_public = round(x[[pf_cases_col]] * x[[tx_cov_col]] * x[["prop_public"]] * x[["prop_act"]]),
+               commodity_act_private = round(x[[pf_cases_col]] *  x[[tx_cov_col]] * (1 - x[["prop_public"]]) * x[["prop_act"]]),
+               commodity_non_act_public = round(x[[pf_cases_col]] * x[[tx_cov_col]] * x[["prop_public"]] * (1 - x[["prop_act"]])),
+               commodity_non_act_private = round(x[[pf_cases_col]] * x[[tx_cov_col]] * (1 - x[["prop_public"]]) * (1 - x[["prop_act"]])),
+               commodity_primaquine_public = round(x[[pv_cases_col]] * x[[tx_cov_col]] * x[["prop_public"]]),
+               commodity_primaquine_private = round(x[[pv_cases_col]] * x[[tx_cov_col]] * (1 - x[["prop_public"]])),
+               commodity_rdt_public = round(x[[tx_cov_col]] * x[["prop_act"]] * x[[pf_cases_col]] * x[["prop_public"]]),
+               commodity_rdt_private = round(x[[tx_cov_col]] * x[["prop_act"]] * x[[pf_cases_col]] * (1 - x[["prop_public"]])),
+               commodity_microscopy_public = round(x[[tx_cov_col]] * (1 - x[["prop_act"]]) * x[[pf_cases_col]] * x[["prop_public"]]) +
+                 round(x[[tx_cov_col]] * x[[pv_cases_col]] * x[["prop_public"]]),
+               commodity_microscopy_private = round(x[[tx_cov_col]] * (1 - x[["prop_act"]]) * x[[pf_cases_col]] * (1 - x[["prop_public"]])) +
+                 round(x[[tx_cov_col]] * x[[pv_cases_col]] * (1 - x[["prop_public"]])),
+               commodity_nmf_rdt_public = ifelse(x[["pfpr_2_10"]] > 0.05,
+                                                 round(x[["non_malarial_fevers"]] * x[[tx_cov_col]] * x[["prop_public"]] * x[["prop_act"]]),
+                                                 0),
+               commodity_nmf_rdt_private = ifelse(x[["pfpr_2_10"]] > 0.05,
+                                                  round(x[["non_malarial_fevers"]] * x[[tx_cov_col]] * (1 - x[["prop_public"]]) * x[["prop_act"]]),
+                                                  0)) |>
+    mutate(commodity_nmf_act_public = round(.data$commodity_nmf_rdt_public * x[["pfpr_2_10"]]),
+           commodity_nmf_act_private = round(.data$commodity_nmf_rdt_private * x[["pfpr_2_10"]]))
 
+  if(!is.null(suffix)){
+    colnames(tx_df) <- paste0(colnames(tx_df), suffix)
+  }
+
+  x <- dplyr::bind_cols(x, tx_df)
+  return(x)
 }
 
 #' Treatment costs
@@ -128,13 +94,13 @@ add_facility_visits <- function(x){
     dplyr::mutate(commodity_outpatient_visits = round(.data$tx_cov * (.data$cases_pf + .data$cases_pv) * .data$prop_public),
                   commodity_inpatient_visits = round(.data$tx_cov * (.data$severe_cases_pf + .data$severe_cases_pv)),
                   commodity_outpatient_visits_lower = round(beta_coverage_ci(.data$tx_cov, q = 0.025, average_sample = 1473) *
-                                                              (.data$cases_pf_lower + .data$cases_pv_lower) * .data$prop_public),
+                                                              (.data$cases_lower_pf + .data$cases_lower_pv) * .data$prop_public),
                   commodity_inpatient_visits_lower = round(beta_coverage_ci(.data$tx_cov, q = 0.025, average_sample = 1473) *
-                                                             (.data$severe_cases_pf_lower + .data$severe_cases_pv_lower)),
+                                                             (.data$severe_cases_lower_pf + .data$severe_cases_lower_pv)),
                   commodity_outpatient_visits_upper = round(beta_coverage_ci(.data$tx_cov, q = 0.975, average_sample = 1473) *
-                                                              (.data$cases_pf_upper + .data$cases_pv_upper) * .data$prop_public),
+                                                              (.data$cases_upper_pf + .data$cases_upper_pv) * .data$prop_public),
                   commodity_inpatient_visits_upper = round(beta_coverage_ci(.data$tx_cov, q = 0.975, average_sample = 1473) *
-                                                             (.data$severe_cases_pf_upper + .data$severe_cases_pv_upper)))
+                                                             (.data$severe_cases_upper_pf + .data$severe_cases_upper_pv)))
 }
 
 #' Facility costs
