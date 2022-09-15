@@ -1,13 +1,15 @@
 test_that("dx tx commodities", {
   x <- data.frame(
     cases_pf = c(0, 100),
-    cases_pf_lower = c(0, 10),
-    cases_pf_upper = c(10 , 200),
+    cases_lower_pf = c(0, 10),
+    cases_upper_pf = c(10 , 200),
     cases_pv = c(0, 100),
-    cases_pv_lower = c(0, 10),
-    cases_pv_upper = c(10 , 200),
+    cases_lower_pv = c(0, 10),
+    cases_upper_pv = c(10 , 200),
     pfpr_2_10 = c(0.06, 0.06),
     tx_cov = c(0.5, 0.5),
+    tx_cov_lower = c(0.1, 0.1),
+    tx_cov_upper = c(0.6, 0.6),
     prop_public = c(0.2, 0.2),
     prop_act = c(0.6, 0.6),
     non_malarial_fevers = c(100, 100))
@@ -71,17 +73,17 @@ test_that("facility visits", {
   x <- data.frame(
     tx_cov = c(0.5, 0.5),
     cases_pf = c(0, 100),
-    cases_pf_lower = c(0, 10),
-    cases_pf_upper = c(10, 200),
+    cases_lower_pf = c(0, 10),
+    cases_upper_pf = c(10, 200),
     cases_pv = c(0, 100),
-    cases_pv_lower = c(0, 10),
-    cases_pv_upper = c(10, 200),
+    cases_lower_pv = c(0, 10),
+    cases_upper_pv = c(10, 200),
     severe_cases_pf = c(0, 100),
-    severe_cases_pf_lower = c(0, 10),
-    severe_cases_pf_upper = c(20, 200),
+    severe_cases_lower_pf = c(0, 10),
+    severe_cases_upper_pf = c(20, 200),
     severe_cases_pv = c(0, 100),
-    severe_cases_pv_lower = c(0, 10),
-    severe_cases_pv_upper = c(20, 200),
+    severe_cases_lower_pv = c(0, 10),
+    severe_cases_upper_pv = c(20, 200),
     prop_public = c(0.2, 0.2)
   )
   y <- add_facility_visits(x)

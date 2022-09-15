@@ -4,17 +4,16 @@
 \alias{mortality_rate}
 \title{Add mortality rate}
 \usage{
-mortality_rate(x, scaler_pf = 0.215, scaler_pv = 0.003, treatment_scaler = 0.5)
+mortality_rate(x, scaler, treatment_scaler = 0.5)
 }
 \arguments{
 \item{x}{output}
 
-\item{scaler_pf}{Scaler for falciparum severe cases to deaths}
+\item{scaler}{Scaler for severe cases to deaths. Have used
+original fitted scaler  of 0.215 for falciparum. For vivax can use a scaler
+of 0.003 (Ahmed Rahimi, et al. (2014)).}
 
-\item{scaler_pv}{Scaler for vivax severe cases to deaths. The reference for
-this is Ahmed Rahimi, et al. (2014).}
-
-\item{treatment_scaler}{Impact of treatment coverage on scaling}
+\item{treatment_scaler}{Impact of treatment coverage on scaling.}
 }
 \value{
 output with mortality rates

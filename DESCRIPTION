@@ -1,7 +1,7 @@
 Package: hindsite
 Type: Package
 Title: Hindsite is for postprocessing malariasimulation site runs
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: c(
     person("Pete", "Winskill", email = "p.winskill@imperial.ac.uk", role = c("aut", "cre"))
     )
@@ -18,8 +18,7 @@ RoxygenNote: 7.2.1
 Remotes:
     mrc-ide/treasure,
     mrc-ide/netz,
-    mrc-ide/site@dev,
-    mrc-ide/malariasimulation@dev
+    mrc-ide/site
 Imports: 
     dplyr,
     netz,
@@ -29,5 +28,4 @@ Imports:
     stringr,
     tidyr,
     treasure,
-    site,
-    malariasimulation
+    site

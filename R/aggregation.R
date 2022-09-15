@@ -16,6 +16,9 @@ aggregate_age <- function(x){
       dplyr::across(dplyr::contains("yll"), sum),
       dplyr::across(dplyr::contains("yld"), sum),
       dplyr::across(dplyr::contains("dalys"), sum),
+      dplyr::across(dplyr::contains("n_smc"), mean),
+      dplyr::across(dplyr::contains("n_rtss"), mean),
+      dplyr::across(dplyr::contains("n_pmc"), mean),
       dplyr::across(dplyr::contains("commodity"), sum),
       dplyr::across(dplyr::contains("cost"), sum)
     ) |>

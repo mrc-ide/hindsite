@@ -1,86 +1,66 @@
 test_that("mortality rate", {
-  x <- data.frame(severe_pf = c(0, 0.1, 0.1),
-                  severe_pv = c(0, 0.1, 0.1),
+  x <- data.frame(sev = c(0, 0.1, 0.1),
                   tx_cov = c(0.2, 0.2, 0))
-  y <- mortality_rate(x)
-  expect_equal(y$mortality_pf, (1 - (0.5 * x$tx_cov)) * 0.215 * x$severe_pf)
-  expect_equal(y$mortality_pv, (1 - (0.5 * x$tx_cov)) * 0.003 * x$severe_pv)
+  y <- mortality_rate(x, scaler = 0.215)
+  expect_equal(y$mort, (1 - (0.5 * x$tx_cov)) * 0.215 * x$sev)
 })
 
 test_that("cases", {
-  x <- data.frame(clinical_pf = c(0, 0.1, 0.1),
-                  clinical_pv = c(0, 0.1, 0.1),
-                  par_pf = c(100, 0, 100),
-                  par_pv = c(100, 0, 100))
+  x <- data.frame(inc = c(0, 0.1, 0.1),
+                  par = c(100, 0, 100))
 
   y <- cases(x)
-  expect_equal(y$cases_pf, x$clinical_pf * x$par_pf)
-  expect_equal(y$cases_pv, x$clinical_pv * x$par_pv)
+  expect_equal(y$cases, x$inc * x$par)
 
   test_bounds(y)
 })
 
 test_that("severe cases", {
-  x <- data.frame(severe_pf = c(0, 0.1, 0.1),
-                  severe_pv = c(0, 0.1, 0.1),
-                  par_pf = c(100, 0, 100),
-                  par_pv = c(100, 0, 100))
+  x <- data.frame(sev = c(0, 0.1, 0.1),
+                  par = c(100, 0, 100))
 
   y <- severe_cases(x)
-  expect_equal(y$severe_cases_pf, x$severe_pf * x$par_pf)
-  expect_equal(y$severe_cases_pv, x$severe_pv * x$par_pv)
+  expect_equal(y$severe_cases, x$sev * x$par)
 
   test_bounds(y)
 })
 
 test_that("deaths", {
-  x <- data.frame(mortality_pf = c(0, 0.1, 0.1),
-                  mortality_pv = c(0, 0.1, 0.1),
-                  par_pf = c(100, 0, 100),
-                  par_pv = c(100, 0, 100))
+  x <- data.frame(mort = c(0, 0.1, 0.1),
+                  par = c(100, 0, 100))
 
   y <- deaths(x)
 
-  expect_equal(y$deaths_pf, x$mortality_pf * x$par_pf)
-  expect_equal(y$deaths_pv, x$mortality_pv * x$par_pv)
+  expect_equal(y$deaths, x$mort * x$par)
 
   test_bounds(y)
 })
 
 test_that("yll", {
-  x <- data.frame(deaths_pf = c(0, 100),
-                  deaths_pf_lower = c(0, 10),
-                  deaths_pf_upper = c(10, 200),
-                  deaths_pv = c(0, 100),
-                  deaths_pv_lower = c(0, 10),
-                  deaths_pv_upper = c(10, 200),
+  x <- data.frame(deaths = c(0, 100),
+                  deaths_lower = c(0, 10),
+                  deaths_upper = c(10, 200),
                   age_mid = c(25, 25) * 365)
 
   life_expectancy <- 60
   y <- yll(x, life_expectancy = life_expectancy)
-  expect_equal(y$yll, round((life_expectancy - x$age_mid / 365) * (x$deaths_pf + x$deaths_pv)))
+  expect_equal(y$yll, round((life_expectancy - x$age_mid / 365) * x$deaths))
 
   test_bounds(y)
 })
 
 test_that("yld", {
-  x <- data.frame(cases_pf = c(0, 100, 100, 100),
-                  cases_pf_lower = c(0, 10, 10, 10),
-                  cases_pf_upper = c(10, 200, 200, 200),
-                  cases_pv = c(0, 100, 100, 100),
-                  cases_pv_lower = c(0, 10, 10, 10),
-                  cases_pv_upper = c(10, 200, 200, 200),
-                  severe_cases_pf = c(0, 100, 100, 100),
-                  severe_cases_pf_lower = c(0, 10, 10, 10),
-                  severe_cases_pf_upper = c(10, 200, 200, 200),
-                  severe_cases_pv = c(0, 100, 100, 100),
-                  severe_cases_pv_lower = c(0, 10, 10, 10),
-                  severe_cases_pv_upper = c(10, 200, 200, 200),
+  x <- data.frame(cases = c(0, 100, 100, 100),
+                  cases_lower = c(0, 10, 10, 10),
+                  cases_upper = c(10, 200, 200, 200),
+                  severe_cases = c(0, 100, 100, 100),
+                  severe_cases_lower = c(0, 10, 10, 10),
+                  severe_cases_upper = c(10, 200, 200, 200),
                   age_l = c(0, 0, 1825, 5475))
 
   y <- yld(x)
-  expect_equal(y$yld, round((x$cases_pf + x$cases_pv)  * 0.01375 * c(0.211, 0.211, 0.195, 0.172) +
-                 (x$severe_cases_pf + x$severe_cases_pv) * 0.04795 * 0.6))
+  expect_equal(y$yld, round(x$cases * 0.01375 * c(0.211, 0.211, 0.195, 0.172) +
+                 x$severe_cases * 0.04795 * 0.6))
 
   test_bounds(y)
 })
@@ -109,18 +89,14 @@ test_that("nmfs", {
 
 test_that("add rates",{
   x <- data.frame(age = c(1, 1, 2, 2),
-                  prop = c(0.25,0.75, 0.25, 0.75),
-                  clinical_pf = c(0, 1, 0, 1),
-                  severe_pf = c(0, 1, 0, 1),
-                  clinical_pv = c(0, 1, 0, 1),
-                  severe_pv = c(0, 1, 0, 1))
+                  n = c(10, 20, 30, 40),
+                  inc = c(0, 1, 0, 1),
+                  sev = c(0, 1, 0, 1))
   modelled_population_size <- 1000
-  y <- add_rates(x, modelled_population_size)
+  y <- rates(x, modelled_population_size)
   expect_equal(y,
                data.frame(age = x$age,
-                          prop = x$prop,
-                          clinical_pf = x$clinical_pf / (modelled_population_size * x$prop),
-                          severe_pf = x$severe_pf / (modelled_population_size * x$prop),
-                          clinical_pv = x$clinical_pv / (modelled_population_size * x$prop),
-                          severe_pv = x$severe_pv / (modelled_population_size * x$prop)))
+                          inc = x$inc / x$n,
+                          sev = x$sev / x$n,
+                          prop = x$n / modelled_population_size))
 })
