@@ -17,8 +17,7 @@ Config/testthat/edition: 3
 RoxygenNote: 7.2.1
 Remotes:
     mrc-ide/treasure,
-    mrc-ide/netz,
-    mrc-ide/site
+    mrc-ide/netz
 Imports: 
     dplyr,
     netz,
@@ -27,5 +26,4 @@ Imports:
     stats,
     stringr,
     tidyr,
-    treasure,
-    site
+    treasure
