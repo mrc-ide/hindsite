@@ -1,4 +1,11 @@
-
+#' Add treatment commodities.
+#'
+#' Adds treatment commodities and uncertainty based of uncertainty in
+#' treatment coverage, cases and severe cases.
+#'
+#' @param x output
+#'
+#' @return output with treatment commodities
 add_tx <- function(x){
   x |>
     add_tx_internal() |>
@@ -6,6 +13,12 @@ add_tx <- function(x){
     add_tx_internal(suffix = "_upper")
 }
 
+#' Add treatment commodities
+#'
+#' @param x model output
+#' @param suffix add "_lower" or "_upper" for uncertainty
+#'
+#' @return output with treatment commodities
 add_tx_internal <- function(x, suffix = NULL){
   pf_cases_col <- paste0("cases", suffix, "_pf")
   pv_cases_col <- paste0("cases", suffix, "_pv")
@@ -30,7 +43,7 @@ add_tx_internal <- function(x, suffix = NULL){
                commodity_nmf_rdt_private = ifelse(x[["pfpr_2_10"]] > 0.05,
                                                   round(x[["non_malarial_fevers"]] * x[[tx_cov_col]] * (1 - x[["prop_public"]]) * x[["prop_act"]]),
                                                   0)) |>
-    mutate(commodity_nmf_act_public = round(.data$commodity_nmf_rdt_public * x[["pfpr_2_10"]]),
+    dplyr::mutate(commodity_nmf_act_public = round(.data$commodity_nmf_rdt_public * x[["pfpr_2_10"]]),
            commodity_nmf_act_private = round(.data$commodity_nmf_rdt_private * x[["pfpr_2_10"]]))
 
   if(!is.null(suffix)){

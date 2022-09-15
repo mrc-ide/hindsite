@@ -23,10 +23,10 @@ mortality_rate <- function(x,
 #' @export
 cases <- function(x){
   x |>
-    mutate(
-      cases = round(par * inc),
-      cases_lower = epi_uncertainty_approximation(cases, 0.025, 0.227),
-      cases_upper = epi_uncertainty_approximation(cases, 0.975, 0.227)
+    dplyr::mutate(
+      cases = round(.data$par * .data$inc),
+      cases_lower = epi_uncertainty_approximation(.data$cases, 0.025, 0.227),
+      cases_upper = epi_uncertainty_approximation(.data$cases, 0.975, 0.227)
     ) |>
     dplyr::select(-.data$inc)
 }
@@ -36,12 +36,13 @@ cases <- function(x){
 #' @param x output
 #'
 #' @return output with severe cases
-severe_cases <- function(x){
+#' @export
+ severe_cases <- function(x){
   x |>
-    mutate(
-      severe_cases = round(par * sev),
-      severe_cases_lower = epi_uncertainty_approximation(severe_cases, 0.025, 0.265),
-      severe_cases_upper = epi_uncertainty_approximation(severe_cases, 0.975, 0.265)
+    dplyr::mutate(
+      severe_cases = round(.data$par * .data$sev),
+      severe_cases_lower = epi_uncertainty_approximation(.data$severe_cases, 0.025, 0.265),
+      severe_cases_upper = epi_uncertainty_approximation(.data$severe_cases, 0.975, 0.265)
     ) |>
     dplyr::select(-.data$sev)
 }
@@ -54,10 +55,10 @@ severe_cases <- function(x){
 #' @export
 deaths <- function(x){
   x |>
-    mutate(
-      deaths = round(par * mort),
-      deaths_lower = epi_uncertainty_approximation(deaths, 0.025, 0.265),
-      deaths_upper = epi_uncertainty_approximation(deaths, 0.975, 0.265)
+    dplyr::mutate(
+      deaths = round(.data$par * .data$mort),
+      deaths_lower = epi_uncertainty_approximation(.data$deaths, 0.025, 0.265),
+      deaths_upper = epi_uncertainty_approximation(.data$deaths, 0.975, 0.265)
     ) |>
     dplyr::select(-.data$mort)
 }
@@ -73,10 +74,10 @@ deaths <- function(x){
 #' @export
 yll <- function(x, life_expectancy){
   x |>
-    mutate(
-      yll = round((life_expectancy - age_mid / 365) * deaths),
-      yll_lower = round((life_expectancy - age_mid / 365) * deaths),
-      yll_upper = round((life_expectancy - age_mid / 365) * deaths)
+    dplyr::mutate(
+      yll = round((life_expectancy - .data$age_mid / 365) * .data$deaths),
+      yll_lower = round((life_expectancy - .data$age_mid / 365) * .data$deaths),
+      yll_upper = round((life_expectancy - .data$age_mid / 365) * .data$deaths)
     )
 }
 
@@ -122,10 +123,10 @@ yld <- function(x, episode_length = 0.01375, severe_episode_length = 0.04795,
 #' @export
 dalys <- function(x){
   x  |>
-    mutate(
-      dalys = round(yll + yld),
-      dalys_lower = round(yll_lower + yld_lower),
-      dalys_upper = round(yll_upper + yld_upper)
+    dplyr::mutate(
+      dalys = round(.data$yll + .data$yld),
+      dalys_lower = round(.data$yll_lower + .data$yld_lower),
+      dalys_upper = round(.data$yll_upper + .data$yld_upper)
     )
 }
 
@@ -145,6 +146,13 @@ non_malarial_fevers <- function(x, rate_under_5 = 3.4, rate_over_5 = 1){
     dplyr::mutate(non_malarial_fevers = round(ifelse(.data$age_l == 0, rate_under_5 * .data$par, rate_over_5 * .data$par)))
 }
 
+#' Scale outputs for modelled population size
+#'
+#' @param x Model outputs
+#' @param modelled_population modelled population size
+#'
+#' @return output with prop (age), inc and severe inc
+#' @export
 rates <- function(x, modelled_population){
   x |>
     dplyr::mutate(prop = .data$n / modelled_population,
@@ -153,7 +161,13 @@ rates <- function(x, modelled_population){
     dplyr::select(-.data$n)
 }
 
+#' Add average age in range (assuming exponential demography)
+#'
+#' @param x output
+#'
+#' @return output with age average
+#' @export
 age_mid_point <- function(x){
   x |>
-    mutate(age_mid = exp_mid(.data$age_l, .data$age_u))
+    dplyr::mutate(age_mid = exp_mid(.data$age_l, .data$age_u))
 }

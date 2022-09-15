@@ -1,3 +1,9 @@
+#' Add appropriate species suffix to column names
+#'
+#' @param x output
+#' @param suffix species suffix (pf or pv)
+#'
+#' @return renamed output
 rename_cols <- function(x, suffix){
   to_rename <- c(
     "prop",

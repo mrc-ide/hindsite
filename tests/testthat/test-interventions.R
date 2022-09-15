@@ -4,15 +4,13 @@ test_that("nets", {
                   par = c(100, 100))
   y <- add_nets(x, iso3c = iso3c)
 
-  urs <- netz::get_usage_rate_data()
-  ur <- urs[urs$iso3 == iso3c,2]
-  ur_l <- quantile(urs$usage_rate, 0.025)
-  ur_u <- quantile(urs$usage_rate, 0.975)
+  ur <- 0.8
+  ur_l <- 0.75
+  ur_u <- 0.85
 
-  hls <- netz::get_halflife_data()
-  hl <- hls[hls$iso3 == iso3c,2]
-  hl_l <- quantile(hls$half_life, 0.025)
-  hl_u <- quantile(hls$half_life, 0.975)
+  hl <- 365 * 2
+  hl_l <- round(365 * 1.5)
+  hl_u <- round(365 * 2.5)
 
   access = netz::usage_to_access(usage = x$itn_use, use_rate = ur)
   crop = netz::access_to_crop(access, type = "loess_extrapolate")

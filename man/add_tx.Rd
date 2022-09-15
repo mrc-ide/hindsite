@@ -2,7 +2,7 @@
 % Please edit documentation in R/dx_tx.R
 \name{add_tx}
 \alias{add_tx}
-\title{Treatment and diagnostic commodities}
+\title{Add treatment commodities.}
 \usage{
 add_tx(x)
 }
@@ -10,8 +10,9 @@ add_tx(x)
 \item{x}{output}
 }
 \value{
-output with treatment and diagnostic commodities
+output with treatment commodities
 }
 \description{
-Treatment and diagnostic commodities
+Adds treatment commodities and uncertainty based of uncertainty in
+treatment coverage, cases and severe cases.
 }
