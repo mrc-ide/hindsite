@@ -4,13 +4,15 @@ test_that("nets", {
                   par = c(100, 100))
   y <- add_nets(x, iso3c = iso3c)
 
-  ur <- 0.8
-  ur_l <- 0.75
-  ur_u <- 0.85
+  urd <- netz::get_usage_rate_data()
+  ur <- urd[urd$iso3 == iso3c, "usage_rate"]
+  ur_l <- stats::quantile(urd$usage_rate, 0.025)
+  ur_u <- stats::quantile(urd$usage_rate, 0.975)
 
-  hl <- 365 * 2
-  hl_l <- round(365 * 1.5)
-  hl_u <- round(365 * 2.5)
+  hld <- netz::get_halflife_data()
+  hl <- hld[hld$iso3 == iso3c, "half_life"]
+  hl_l <- stats::quantile(hld$half_life, 0.025)
+  hl_u <- stats::quantile(hld$half_life, 0.975)
 
   access = netz::usage_to_access(usage = x$itn_use, use_rate = ur)
   crop = netz::access_to_crop(access, type = "loess_extrapolate")
@@ -31,8 +33,8 @@ test_that("nets", {
   test_bounds(y)
 
   y <- add_nets(x, iso3c = "X")
-  ur <- median(urs$usage_rate)
-  hl <- median(hls$half_life)
+  ur <- median(urd$usage_rate)
+  hl <- median(hld$half_life)
   access = netz::usage_to_access(usage = x$itn_use, use_rate = ur)
   crop = netz::access_to_crop(access, type = "loess_extrapolate")
   commodity_nets_distributed = round(netz::crop_to_distribution(crop = crop, distribution_freq = 3 * 365, half_life = hl) * x$par)
