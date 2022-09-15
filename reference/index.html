@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">hindsite</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -72,11 +72,6 @@
         <dd>IRS costs</dd>
       </dl><dl><dt>
           
-          <code><a href="add_missing_columns.html">add_missing_columns()</a></code> 
-        </dt>
-        <dd>Add missing columns</dd>
-      </dl><dl><dt>
-          
           <code><a href="add_net_cost.html">add_net_cost()</a></code> 
         </dt>
         <dd>Add net costs</dd>
@@ -85,6 +80,16 @@
           <code><a href="add_nets.html">add_nets()</a></code> 
         </dt>
         <dd>Add nets</dd>
+      </dl><dl><dt>
+          
+          <code><a href="add_pf_columns.html">add_pf_columns()</a></code> 
+        </dt>
+        <dd>Add missing columns to pf model output</dd>
+      </dl><dl><dt>
+          
+          <code><a href="add_pfpr.html">add_pfpr()</a></code> 
+        </dt>
+        <dd>Add plasmodium falciparum prevalence</dd>
       </dl><dl><dt>
           
           <code><a href="add_pmc.html">add_pmc()</a></code> 
@@ -97,10 +102,9 @@
         <dd>Add PMC cost</dd>
       </dl><dl><dt>
           
-          <code><a href="add_rates.html">add_rates()</a></code> 
+          <code><a href="add_pvpr.html">add_pvpr()</a></code> 
         </dt>
-        <dd>Converts modelled quantities of age-disaggregated cases and severe cases
-to rates</dd>
+        <dd>Add plasmodium vivax prevalence</dd>
       </dl><dl><dt>
           
           <code><a href="add_rtss.html">add_rtss()</a></code> 
@@ -111,6 +115,11 @@ to rates</dd>
           <code><a href="add_rtss_cost.html">add_rtss_cost()</a></code> 
         </dt>
         <dd>Add rtss cost</dd>
+      </dl><dl><dt>
+          
+          <code><a href="add_rtss_total.html">add_rtss_total()</a></code> 
+        </dt>
+        <dd>Add total number of RTS,S doses</dd>
       </dl><dl><dt>
           
           <code><a href="add_smc.html">add_smc()</a></code> 
@@ -130,7 +139,7 @@ to rates</dd>
           
           <code><a href="add_tx.html">add_tx()</a></code> 
         </dt>
-        <dd>Treatment and diagnostic commodities</dd>
+        <dd>Add treatment commodities.</dd>
       </dl><dl><dt>
           
           <code><a href="add_tx_costs.html">add_tx_costs()</a></code> 
@@ -138,14 +147,29 @@ to rates</dd>
         <dd>Treatment costs</dd>
       </dl><dl><dt>
           
+          <code><a href="add_tx_internal.html">add_tx_internal()</a></code> 
+        </dt>
+        <dd>Add treatment commodities</dd>
+      </dl><dl><dt>
+          
           <code><a href="add_year.html">add_year()</a></code> 
         </dt>
         <dd>Add year column based on model timestep and baseline year</dd>
       </dl><dl><dt>
           
+          <code><a href="age_mid_point.html">age_mid_point()</a></code> 
+        </dt>
+        <dd>Add average age in range (assuming exponential demography)</dd>
+      </dl><dl><dt>
+          
           <code><a href="aggregate_age.html">aggregate_age()</a></code> 
         </dt>
         <dd>Aggregate over age groups</dd>
+      </dl><dl><dt>
+          
+          <code><a href="beta_coverage_ci.html">beta_coverage_ci()</a></code> 
+        </dt>
+        <dd>Beta distributed uncertainty for coverage-related commodity outputs</dd>
       </dl><dl><dt>
           
           <code><a href="cases.html">cases()</a></code> 
@@ -163,30 +187,40 @@ to rates</dd>
         <dd>Add malaria deaths</dd>
       </dl><dl><dt>
           
+          <code><a href="empty_pf.html">empty_pf()</a></code> 
+        </dt>
+        <dd>Empty pf output</dd>
+      </dl><dl><dt>
+          
+          <code><a href="empty_pv.html">empty_pv()</a></code> 
+        </dt>
+        <dd>Empty pv output</dd>
+      </dl><dl><dt>
+          
+          <code><a href="epi_uncertainty_approximation.html">epi_uncertainty_approximation()</a></code> 
+        </dt>
+        <dd>Uncertainty approximation for epi outcomes</dd>
+      </dl><dl><dt>
+          
           <code><a href="exp_mid.html">exp_mid()</a></code> 
         </dt>
         <dd>Approximate mean age within an age bracket assuming exponential
 age distribution</dd>
       </dl><dl><dt>
           
-          <code><a href="format_age.html">format_age()</a></code> 
+          <code><a href="link_interventions.html">link_interventions()</a></code> 
         </dt>
-        <dd>Wrangle raw age-group output</dd>
+        <dd>Link intervention inputs</dd>
       </dl><dl><dt>
           
-          <code><a href="format_epi.html">format_epi()</a></code> 
+          <code><a href="link_pop.html">link_pop()</a></code> 
         </dt>
-        <dd>Wrangle raw epi output</dd>
+        <dd>Link PAR and adjust for age proportions</dd>
       </dl><dl><dt>
           
-          <code><a href="format_interventions.html">format_interventions()</a></code> 
+          <code><a href="link_tx.html">link_tx()</a></code> 
         </dt>
-        <dd>Wrangle raw intervention output</dd>
-      </dl><dl><dt>
-          
-          <code><a href="format_prev.html">format_prev()</a></code> 
-        </dt>
-        <dd>Wrangle raw prevalence output</dd>
+        <dd>Link treatment coverage and add coverage uncertainty</dd>
       </dl><dl><dt>
           
           <code><a href="mortality_rate.html">mortality_rate()</a></code> 
@@ -199,9 +233,29 @@ age distribution</dd>
         <dd>non_malarial_fevers</dd>
       </dl><dl><dt>
           
+          <code><a href="rates.html">rates()</a></code> 
+        </dt>
+        <dd>Scale outputs for modelled population size</dd>
+      </dl><dl><dt>
+          
+          <code><a href="rename_cols.html">rename_cols()</a></code> 
+        </dt>
+        <dd>Add appropriate species suffix to column names</dd>
+      </dl><dl><dt>
+          
           <code><a href="severe_cases.html">severe_cases()</a></code> 
         </dt>
         <dd>Add malaria severe cases</dd>
+      </dl><dl><dt>
+          
+          <code><a href="wrangle_pf.html">wrangle_pf()</a></code> 
+        </dt>
+        <dd>Wrangle pf model output</dd>
+      </dl><dl><dt>
+          
+          <code><a href="wrangle_pv.html">wrangle_pv()</a></code> 
+        </dt>
+        <dd>Wrangle pv model output</dd>
       </dl><dl><dt>
           
           <code><a href="yld.html">yld()</a></code> 
