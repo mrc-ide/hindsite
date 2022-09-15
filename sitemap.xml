@@ -112,6 +112,18 @@
     <loc>/reference/exp_mid.html</loc>
   </url>
   <url>
+    <loc>/reference/get_age_aggregated.html</loc>
+  </url>
+  <url>
+    <loc>/reference/get_age_disaggregated.html</loc>
+  </url>
+  <url>
+    <loc>/reference/get_pf.html</loc>
+  </url>
+  <url>
+    <loc>/reference/get_pv.html</loc>
+  </url>
+  <url>
     <loc>/reference/index.html</loc>
   </url>
   <url>
