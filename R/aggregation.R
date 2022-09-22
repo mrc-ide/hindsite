@@ -8,8 +8,8 @@ aggregate_age <- function(x){
   x |>
     dplyr::group_by(.data$year) |>
     dplyr::summarise(
-      pfpr_2_10 = stats::weighted.mean(.data$pfpr_2_10, .data$par_pf),
-      pvpr_1_99 = stats::weighted.mean(.data$pvpr_1_99, .data$par_pv),
+      pfpr_2_10 = ifelse(sum(.data$par_pf) > 0, stats::weighted.mean(.data$pfpr_2_10, .data$par_pf), 0),
+      pvpr_1_99 = ifelse(sum(.data$par_pv) > 0, stats::weighted.mean(.data$pvpr_1_99, .data$par_pv), 0),
       dplyr::across(dplyr::contains("par"), sum),
       pop = sum(.data$pop),
       dplyr::across(dplyr::contains("cases"), sum),
