@@ -16,10 +16,11 @@ get_age_disaggregated <- function(pf, pv, iso3c, population){
     dplyr::ungroup() |>
 
     dplyr::left_join(population) |>
-    dplyr::mutate(pop = .data$pop * .data$prop,
-           par = .data$par * .data$prop,
-           par_pf = .data$par * .data$prop,
-           par_pv = .data$par * .data$prop) |>
+    dplyr::mutate(
+      pop = .data$pop * .data$prop,
+      par = .data$par * .data$prop,
+      par_pf = .data$par_pf * .data$prop,
+      par_pv = .data$par_pv * .data$prop) |>
 
     non_malarial_fevers() |>
     add_tx() |>
