@@ -37,9 +37,9 @@ add_nets <- function(x, iso3c){
       crop = netz::access_to_crop(.data$access, type = "loess_extrapolate"),
       crop_lower = netz::access_to_crop(.data$access_lower, type = "loess_extrapolate"),
       crop_upper = netz::access_to_crop(.data$access_upper, type = "loess_extrapolate"),
-      commodity_nets_distributed = round(netz::crop_to_distribution(crop = .data$crop, distribution_freq = 3 * 365, half_life = hl) * .data$par),
-      commodity_nets_distributed_lower = round(netz::crop_to_distribution(crop = .data$crop_lower, distribution_freq = 3 * 365, half_life = hl_max) * .data$par),
-      commodity_nets_distributed_upper = round(netz::crop_to_distribution(crop = .data$crop_upper, distribution_freq = 3 * 365, half_life = hl_min) * .data$par)) |>
+      commodity_nets_distributed = round(netz::crop_to_distribution_dynamic(crop = .data$crop, net_loss_function = net_loss_map, half_life = hl) * .data$par),
+      commodity_nets_distributed_lower = round(netz::crop_to_distribution_dynamic(crop = .data$crop_lower, net_loss_function = net_loss_map, half_life = hl_max) * .data$par),
+      commodity_nets_distributed_upper = round(netz::crop_to_distribution_dynamic(crop = .data$crop_upper, net_loss_function = net_loss_map, half_life = hl_min) * .data$par)) |>
     dplyr::select(-c(.data$access_lower, .data$access_upper, .data$crop, .data$crop_lower, .data$crop_upper))
 }
 
