@@ -34,9 +34,9 @@ add_nets <- function(x, iso3c){
       access_lower = ifelse(is.na(.data$access_lower), 1, .data$access_lower),
       access_upper = netz::usage_to_access(usage = .data$itn_use, use_rate = ur_min),
       access_upper = ifelse(is.na(.data$access_upper), 1, .data$access_upper),
-      crop = ifelse(.data$access == 0, 0, netz::access_to_crop(.data$access, type = "loess_extrapolate")),
-      crop_lower = ifelse(.data$access_lower == 0, 0, netz::access_to_crop(.data$access_lower, type = "loess_extrapolate")),
-      crop_upper = ifelse(.data$access_upper == 0, 0, netz::access_to_crop(.data$access_upper, type = "loess_extrapolate")),
+      crop = netz::access_to_crop(.data$access, type = "loess_extrapolate"),
+      crop_lower = netz::access_to_crop(.data$access_lower, type = "loess_extrapolate"),
+      crop_upper = netz::access_to_crop(.data$access_upper, type = "loess_extrapolate"),
       commodity_nets_distributed = round(netz::crop_to_distribution_dynamic(crop = .data$crop, net_loss_function = netz::net_loss_map, half_life = hl) * .data$par),
       commodity_nets_distributed_lower = round(netz::crop_to_distribution_dynamic(crop = .data$crop_lower, net_loss_function = netz::net_loss_map, half_life = hl_max) * .data$par),
       commodity_nets_distributed_upper = round(netz::crop_to_distribution_dynamic(crop = .data$crop_upper, net_loss_function = netz::net_loss_map, half_life = hl_min) * .data$par)) |>
