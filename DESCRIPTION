@@ -1,7 +1,7 @@
 Package: hindsite
 Type: Package
 Title: Hindsite is for postprocessing malariasimulation site runs
-Version: 0.2.3
+Version: 0.3.0
 Authors@R: c(
     person("Pete", "Winskill", email = "p.winskill@imperial.ac.uk", role = c("aut", "cre"))
     )

@@ -16,17 +16,20 @@ test_that("nets", {
 
   access = netz::usage_to_access(usage = x$itn_use, use_rate = ur)
   crop = netz::access_to_crop(access, type = "loess_extrapolate")
+  crop[access == 0] <- 0
   commodity_nets_distributed = round(netz::crop_to_distribution_dynamic(crop = crop, net_loss_function = netz::net_loss_map, half_life = hl) * x$par)
 
   expect_equal(y$commodity_nets_distributed, commodity_nets_distributed)
 
   access = netz::usage_to_access(usage = x$itn_use, use_rate = ur_u)
   crop = netz::access_to_crop(access, type = "loess_extrapolate")
+  crop[access == 0] <- 0
   commodity_nets_distributed = round(netz::crop_to_distribution_dynamic(crop = crop, net_loss_function = netz::net_loss_map, half_life = hl_u) * x$par)
   expect_equal(y$commodity_nets_distributed_lower, commodity_nets_distributed)
 
   access = netz::usage_to_access(usage = x$itn_use, use_rate = ur_l)
   crop = netz::access_to_crop(access, type = "loess_extrapolate")
+  crop[access == 0] <- 0
   commodity_nets_distributed = round(netz::crop_to_distribution_dynamic(crop = crop, net_loss_function = netz::net_loss_map, half_life = hl_l) * x$par)
   expect_equal(y$commodity_nets_distributed_upper, commodity_nets_distributed)
 
@@ -37,6 +40,7 @@ test_that("nets", {
   hl <- median(hld$half_life)
   access = netz::usage_to_access(usage = x$itn_use, use_rate = ur)
   crop = netz::access_to_crop(access, type = "loess_extrapolate")
+  crop[access == 0] <- 0
   commodity_nets_distributed = round(netz::crop_to_distribution_dynamic(crop = crop, net_loss_function = netz::net_loss_map, half_life = hl) * x$par)
 
   expect_equal(y$commodity_nets_distributed, commodity_nets_distributed)
